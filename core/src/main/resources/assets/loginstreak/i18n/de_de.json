@@ -1,0 +1,21 @@
+{
+  "loginstreak": {
+    "settings": {
+      "name": "Login Streak Display",
+      "enabled": {
+        "name": "Aktiviert"
+      },
+      "scale": {
+        "name": "Anzeigegröße ändern"
+      },
+      "hideZero": {
+        "name": "Null verstecken"
+      },
+      "clearCache": {
+        "name": "Leere Cache",
+        "notification": "Cache geleert",
+        "button": "Lösche"
+      }
+    }
+  }
+}
