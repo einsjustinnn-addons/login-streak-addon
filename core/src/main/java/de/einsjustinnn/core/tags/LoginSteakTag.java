@@ -10,10 +10,12 @@ import net.labymod.api.client.entity.player.Player;
 import net.labymod.api.client.entity.player.tag.tags.NameTag;
 import net.labymod.api.client.gui.HorizontalAlignment;
 import net.labymod.api.client.gui.icon.Icon;
+import net.labymod.api.client.network.NetworkPlayerInfo;
 import net.labymod.api.client.render.RenderPipeline;
 import net.labymod.api.client.render.font.RenderableComponent;
 import net.labymod.api.client.render.matrix.Stack;
 import net.labymod.api.client.resources.ResourceLocation;
+import net.labymod.api.metadata.Metadata;
 import org.jetbrains.annotations.Nullable;
 
 public class LoginSteakTag extends NameTag {
@@ -76,6 +78,11 @@ public class LoginSteakTag extends NameTag {
     }
 
     if (!(entity instanceof Player player)) {
+      return null;
+    }
+
+    NetworkPlayerInfo networkPlayerInfo = player.getNetworkPlayerInfo();
+    if (networkPlayerInfo == null) {
       return null;
     }
 
