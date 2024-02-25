@@ -15,7 +15,6 @@ import net.labymod.api.client.render.RenderPipeline;
 import net.labymod.api.client.render.font.RenderableComponent;
 import net.labymod.api.client.render.matrix.Stack;
 import net.labymod.api.client.resources.ResourceLocation;
-import net.labymod.api.metadata.Metadata;
 import org.jetbrains.annotations.Nullable;
 
 public class LoginSteakTag extends NameTag {

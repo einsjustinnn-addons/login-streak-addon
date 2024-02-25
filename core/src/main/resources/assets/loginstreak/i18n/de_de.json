@@ -14,7 +14,7 @@
       "clearCache": {
         "name": "Leere Cache",
         "notification": "Cache geleert",
-        "button": "Lösche"
+        "text": "Lösche"
       }
     }
   }

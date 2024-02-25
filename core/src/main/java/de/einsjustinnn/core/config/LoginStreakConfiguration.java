@@ -33,7 +33,8 @@ public class LoginStreakConfiguration extends AddonConfig {
   private final ConfigProperty<Boolean> hideZero = new ConfigProperty<>(true);
 
   @MethodOrder(after = "enabled")
-  @ButtonSetting(translation = "loginstreak.settings.clearCache.button")
+  @ButtonSetting
+  @SuppressWarnings("unused")
   public void clearCache() {
     LoginStreakCache.loginStreaks.clear();
     Notification notification = Notification.builder()
