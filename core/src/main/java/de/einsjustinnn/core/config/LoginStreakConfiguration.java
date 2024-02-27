@@ -22,14 +22,15 @@ import net.labymod.api.util.MethodOrder;
 public class LoginStreakConfiguration extends AddonConfig {
 
   @SwitchSetting
+  @SpriteSlot()
   private final ConfigProperty<Boolean> enabled = new ConfigProperty<>(true);
 
   @SliderSetting(min = 3, max = 10)
-  @SpriteSlot()
+  @SpriteSlot(x = 1)
   private final ConfigProperty<Integer> scale = new ConfigProperty<>(10);
 
   @SwitchSetting
-  @SpriteSlot(x = 1)
+  @SpriteSlot(x = 2)
   private final ConfigProperty<Boolean> hideZero = new ConfigProperty<>(true);
 
   @MethodOrder(after = "enabled")
