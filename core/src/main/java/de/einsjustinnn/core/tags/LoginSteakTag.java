@@ -4,6 +4,7 @@ import de.einsjustinnn.core.LoginStreakAddon;
 import de.einsjustinnn.core.utils.LoginStreakApi;
 import de.einsjustinnn.core.utils.LoginStreakCache;
 import java.util.UUID;
+import de.einsjustinnn.core.utils.StreakResolver;
 import net.labymod.api.Laby;
 import net.labymod.api.client.component.Component;
 import net.labymod.api.client.entity.player.Player;
@@ -19,11 +20,12 @@ public class LoginSteakTag extends NameTag {
 
   private final LoginStreakApi loginStreakApi;
 
-  private int streak;
-
   public LoginSteakTag() {
     loginStreakApi = new LoginStreakApi();
   }
+
+  private int streak;
+  private long rateLimited;
 
   @Override
   public boolean isVisible() {
@@ -71,17 +73,34 @@ public class LoginSteakTag extends NameTag {
     if (LoginStreakCache.loginStreaks.containsKey(uuid)) {
       streak = LoginStreakCache.loginStreaks.get(uuid);
     } else {
+
+      if (System.currentTimeMillis() < rateLimited) {
+        LoginStreakAddon.getAddon().logger().info("current in rate limit " + (rateLimited - System.currentTimeMillis()));
+        return null;
+      }
+
       if (!LoginStreakCache.resolving.contains(uuid)) {
 
         LoginStreakCache.resolving.add(uuid);
 
         LoginStreakAddon.getAddon().logger().debug("resolve. " + player.getName() + ":" + player.getUniqueId().toString());
 
-        loginStreakApi.getLoginStreak(uuid).thenAccept(newStreak -> {
-          LoginStreakCache.loginStreaks.put(uuid, newStreak);
-          LoginStreakCache.resolving.remove(uuid);
-          LoginStreakAddon.getAddon().logger().debug("remove resolved from Cache. " + player.getName() + ":" + player.getUniqueId().toString());
-          streak = newStreak;
+        loginStreakApi.resolveHandler(uuid, new StreakResolver() {
+          @Override
+          public void onSuccess(int count) {
+            LoginStreakCache.loginStreaks.put(uuid, count);
+            LoginStreakCache.resolving.remove(uuid);
+            LoginStreakAddon.getAddon().logger().debug("remove resolved from Cache. " + player.getName() + ":" + player.getUniqueId().toString());
+            streak = count;
+          }
+
+          @Override
+          public void onFailed(int responseCode) {
+            if (responseCode == 429) {
+              rateLimited = System.currentTimeMillis() + 30000;
+              LoginStreakAddon.getAddon().logger().debug("Rate Limit");
+            }
+          }
         });
       }
       return null;

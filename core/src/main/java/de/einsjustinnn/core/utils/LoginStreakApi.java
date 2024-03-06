@@ -14,9 +14,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class LoginStreakApi {
 
-  public CompletableFuture<Integer> getLoginStreak(UUID uuid) {
+  public void resolveHandler(UUID uuid, StreakResolver rateLimit) {
 
-    return CompletableFuture.supplyAsync(() -> {
+    CompletableFuture.supplyAsync(() -> {
 
       int streak = 0;
 
@@ -27,24 +27,33 @@ public class LoginStreakApi {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
         connection.setRequestMethod("GET");
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36");
+        connection.setReadTimeout(5000);
+        connection.setConnectTimeout(2000);
 
-        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+        if (connection.getResponseCode() == 200) {
+          try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
 
-          StringBuilder stringBuilder = new StringBuilder();
-          String responseLine;
+            StringBuilder stringBuilder = new StringBuilder();
+            String responseLine;
 
-          while ((responseLine = bufferedReader.readLine()) != null) {
-            stringBuilder.append(responseLine.trim());
+            while ((responseLine = bufferedReader.readLine()) != null) {
+              stringBuilder.append(responseLine.trim());
+            }
+
+            JsonObject jsonObject = JsonParser.parseString(stringBuilder.toString()).getAsJsonObject();
+
+            if (jsonObject.get("playtime") != null) {
+              streak = jsonObject.get("playtime").getAsJsonObject().get("streak").getAsInt();
+            }
+
+          } finally {
+            connection.disconnect();
           }
 
-          JsonObject jsonObject = JsonParser.parseString(stringBuilder.toString()).getAsJsonObject();
-
-          if (jsonObject.get("playtime") != null) {
-            streak = jsonObject.get("playtime").getAsJsonObject().get("streak").getAsInt();
-          }
-
-        } finally {
-          connection.disconnect();
+          rateLimit.onSuccess(streak);
+        } else {
+          rateLimit.onFailed(connection.getResponseCode());
         }
 
       } catch (IOException e) {
@@ -53,5 +62,6 @@ public class LoginStreakApi {
 
       return streak;
     });
+
   }
 }
