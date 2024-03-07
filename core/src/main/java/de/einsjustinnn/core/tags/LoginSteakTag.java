@@ -29,7 +29,7 @@ public class LoginSteakTag extends NameTag {
 
   @Override
   public boolean isVisible() {
-    return LoginStreakAddon.getAddon().configuration().enabled().get();
+    return !this.entity.isCrouching() && LoginStreakAddon.getAddon().configuration().enabled().get();
   }
 
   @Override
@@ -71,7 +71,14 @@ public class LoginSteakTag extends NameTag {
     UUID uuid = player.getUniqueId();
 
     if (LoginStreakCache.loginStreaks.containsKey(uuid)) {
-      streak = LoginStreakCache.loginStreaks.get(uuid);
+
+      int streak1 = LoginStreakCache.loginStreaks.getOrDefault(uuid, -1);
+
+      if (streak1 == -1) {
+        requestStreak(player);
+      }
+
+      streak = streak1;
     } else {
 
       if (System.currentTimeMillis() < rateLimited) {
@@ -80,29 +87,9 @@ public class LoginSteakTag extends NameTag {
       }
 
       if (!LoginStreakCache.resolving.contains(uuid)) {
-
-        LoginStreakCache.resolving.add(uuid);
-
-        LoginStreakAddon.getAddon().logger().debug("resolve. " + player.getName() + ":" + player.getUniqueId().toString());
-
-        loginStreakApi.resolveHandler(uuid, new StreakResolver() {
-          @Override
-          public void onSuccess(int count) {
-            LoginStreakCache.loginStreaks.put(uuid, count);
-            LoginStreakCache.resolving.remove(uuid);
-            LoginStreakAddon.getAddon().logger().debug("remove resolved from Cache. " + player.getName() + ":" + player.getUniqueId().toString());
-            streak = count;
-          }
-
-          @Override
-          public void onFailed(int responseCode) {
-            if (responseCode == 429) {
-              rateLimited = System.currentTimeMillis() + 30000;
-              LoginStreakAddon.getAddon().logger().debug("Rate Limit");
-            }
-          }
-        });
+        requestStreak(player);
       }
+
       return null;
     }
 
@@ -110,9 +97,44 @@ public class LoginSteakTag extends NameTag {
       return null;
     }
 
-    String streakString = formatStreak(streak);
+    String streakString;
+
+    if (streak == -2) {
+      streakString = "§7hide";
+    } else {
+      streakString = formatStreak(streak);
+    }
+
 
     return RenderableComponent.of(Component.text(streakString));
+  }
+
+  private void requestStreak(Player player) {
+
+    UUID uuid = player.getUniqueId();
+
+    LoginStreakCache.resolving.add(uuid);
+
+    LoginStreakAddon.getAddon().logger().debug("resolve. " + player.getName() + ":" + player.getUniqueId().toString());
+
+    loginStreakApi.resolveHandler(uuid, new StreakResolver() {
+      @Override
+      public void onSuccess(int count) {
+        LoginStreakCache.loginStreaks.put(uuid, count);
+        LoginStreakCache.resolving.remove(uuid);
+        LoginStreakAddon.getAddon().logger().debug("remove resolved from Cache. " + player.getName() + ":" + player.getUniqueId().toString());
+        streak = count;
+      }
+
+      @Override
+      public void onFailed(int responseCode) {
+        if (responseCode == 429) {
+          rateLimited = System.currentTimeMillis() + 30000;
+          LoginStreakAddon.getAddon().logger().debug("Rate Limit");
+        }
+      }
+    });
+
   }
 
   private String formatStreak(int streak) {
