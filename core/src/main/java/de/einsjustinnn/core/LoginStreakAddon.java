@@ -11,6 +11,11 @@ public class LoginStreakAddon extends LabyAddon<LoginStreakConfiguration> {
 
   private static LoginStreakAddon addon;
 
+  /* TODO
+  remove goofy aah System logs
+  add Switcher for hided streaks
+   */
+
   @Override
   protected void enable() {
 
