@@ -31,6 +31,8 @@ public class LoginStreakApi {
         connection.setReadTimeout(5000);
         connection.setConnectTimeout(2000);
 
+        System.out.println(connection.getResponseCode());
+
         if (connection.getResponseCode() == 200) {
           try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
 
@@ -45,6 +47,8 @@ public class LoginStreakApi {
 
             if (jsonObject.get("playtime") != null) {
               streak = jsonObject.get("playtime").getAsJsonObject().get("streak").getAsInt();
+            } else {
+              streak = -2;
             }
 
           } finally {
@@ -57,6 +61,7 @@ public class LoginStreakApi {
         }
 
       } catch (IOException e) {
+        streak = -1;
         LoginStreakAddon.getAddon().logger().debug("No data could be retrieved from " + uuid + ". " + e.getMessage());
       }
 
