@@ -18,11 +18,13 @@ public class LoginStreakApi {
 
     CompletableFuture.supplyAsync(() -> {
 
+      String gameStatsUrl = String.format("https://laby.net/api/v3/user/%s/game-stats", uuid);
+
       int streak = 0;
 
       try {
 
-        URL url = new URL("https://laby.net/api/v3/user/" + uuid + "/game-stats");
+        URL url = new URL(gameStatsUrl);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -30,8 +32,6 @@ public class LoginStreakApi {
         connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36");
         connection.setReadTimeout(5000);
         connection.setConnectTimeout(2000);
-
-        System.out.println(connection.getResponseCode());
 
         if (connection.getResponseCode() == 200) {
           try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
