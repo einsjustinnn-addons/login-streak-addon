@@ -3,7 +3,6 @@ package de.einsjustinnn.core.tags;
 import de.einsjustinnn.core.LoginStreakAddon;
 import de.einsjustinnn.core.utils.LoginStreakApi;
 import de.einsjustinnn.core.utils.LoginStreakCache;
-import java.util.UUID;
 import de.einsjustinnn.core.utils.StreakResolver;
 import net.labymod.api.Laby;
 import net.labymod.api.client.component.Component;
@@ -16,16 +15,18 @@ import net.labymod.api.client.render.matrix.Stack;
 import net.labymod.api.client.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class LoginSteakTag extends NameTag {
 
   private final LoginStreakApi loginStreakApi;
+  private int streak;
+  private long rateLimited;
+  private int tempRate;
 
   public LoginSteakTag() {
     loginStreakApi = new LoginStreakApi();
   }
-
-  private int streak;
-  private long rateLimited;
 
   @Override
   public boolean isVisible() {
@@ -44,16 +45,13 @@ public class LoginSteakTag extends NameTag {
 
   @Override
   protected void renderText(Stack stack, RenderableComponent component, boolean discrete, int textColor, int backgroundColor, float x, float y) {
-
     if (!LoginStreakAddon.getAddon().configuration().enabled().get()) return;
     if (getRenderableComponent() == null) return;
 
     Icon icon = Icon.texture(ResourceLocation.create("loginstreak", "textures/icon_streak.png"));
-
     RenderPipeline renderPipeline = Laby.references().renderPipeline();
 
     renderPipeline.rectangleRenderer().renderRectangle(stack, x, y, getWidth(), getHeight(), backgroundColor);
-
     renderPipeline.renderSeeThrough(entity, () -> icon.render(stack, x + 1, y + 1, getHeight() - 3));
 
     float textX = x + getHeight();
@@ -71,7 +69,6 @@ public class LoginSteakTag extends NameTag {
     UUID uuid = player.getUniqueId();
 
     if (LoginStreakCache.loginStreaks.containsKey(uuid)) {
-
       int streak1 = LoginStreakCache.loginStreaks.getOrDefault(uuid, -1);
 
       if (streak1 == -1) {
@@ -80,9 +77,15 @@ public class LoginSteakTag extends NameTag {
 
       streak = streak1;
     } else {
-
       if (System.currentTimeMillis() < rateLimited) {
-        LoginStreakAddon.getAddon().logger().info("current in rate limit " + (rateLimited - System.currentTimeMillis()));
+        int rateLimitSeconds = (int) ((rateLimited - System.currentTimeMillis()) / 1000);
+        if (tempRate == 0) {
+          tempRate = rateLimitSeconds;
+        }
+        if (tempRate >= rateLimitSeconds) {
+          LoginStreakAddon.getAddon().logger().info("currently in the rate limit for " + rateLimitSeconds + " seconds.");
+          tempRate--;
+        }
         return null;
       }
 
@@ -97,32 +100,23 @@ public class LoginSteakTag extends NameTag {
       return null;
     }
 
-    String streakString;
-
-    if (streak == -2) {
-      streakString = "§7hide";
-    } else {
-      streakString = formatStreak(streak);
-    }
-
-
+    String streakString = (streak == -2) ? "§7hide" : formatStreak(streak);
     return RenderableComponent.of(Component.text(streakString));
   }
 
   private void requestStreak(Player player) {
-
     UUID uuid = player.getUniqueId();
 
     LoginStreakCache.resolving.add(uuid);
 
-    LoginStreakAddon.getAddon().logger().debug("resolve. " + player.getName() + ":" + player.getUniqueId().toString());
+    LoginStreakAddon.getAddon().logger().debug("Resolve data from  " + player.getName() + ":" + player.getUniqueId().toString());
 
     loginStreakApi.resolveHandler(uuid, new StreakResolver() {
       @Override
       public void onSuccess(int count) {
         LoginStreakCache.loginStreaks.put(uuid, count);
         LoginStreakCache.resolving.remove(uuid);
-        LoginStreakAddon.getAddon().logger().debug("remove resolved from Cache. " + player.getName() + ":" + player.getUniqueId().toString());
+        LoginStreakAddon.getAddon().logger().debug("Data resolved from " + player.getName() + ":" + player.getUniqueId().toString());
         streak = count;
       }
 
@@ -130,18 +124,13 @@ public class LoginSteakTag extends NameTag {
       public void onFailed(int responseCode) {
         if (responseCode == 429) {
           rateLimited = System.currentTimeMillis() + 30000;
-          LoginStreakAddon.getAddon().logger().debug("Rate Limit");
+          LoginStreakAddon.getAddon().logger().debug("Rate Limit occurred.");
         }
       }
     });
-
   }
 
   private String formatStreak(int streak) {
-    if (streak > 365) {
-      return "§6§o" + streak;
-    } else {
-      return "§e§o" + streak;
-    }
+    return (streak > 365) ? "§6§o" + streak : "§e§o" + streak;
   }
 }
