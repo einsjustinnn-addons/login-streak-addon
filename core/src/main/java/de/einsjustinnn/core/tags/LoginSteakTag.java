@@ -100,7 +100,12 @@ public class LoginSteakTag extends NameTag {
       return null;
     }
 
+    if (streak == -2 && LoginStreakAddon.getAddon().configuration().hideHidedStreak().get()) {
+      return null;
+    }
+
     String streakString = (streak == -2) ? "§7hide" : formatStreak(streak);
+
     return RenderableComponent.of(Component.text(streakString));
   }
 

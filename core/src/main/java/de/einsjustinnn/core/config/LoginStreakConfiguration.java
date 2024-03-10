@@ -33,6 +33,10 @@ public class LoginStreakConfiguration extends AddonConfig {
   @SpriteSlot(x = 2)
   private final ConfigProperty<Boolean> hideZero = new ConfigProperty<>(true);
 
+
+  @SwitchSetting
+  private final ConfigProperty<Boolean> hideHidedStreak = new ConfigProperty<>(true);
+
   @MethodOrder(after = "enabled")
   @ButtonSetting
   @SuppressWarnings("unused")
@@ -57,5 +61,9 @@ public class LoginStreakConfiguration extends AddonConfig {
 
   public ConfigProperty<Boolean> hideZero() {
     return hideZero;
+  }
+
+  public ConfigProperty<Boolean> hideHidedStreak() {
+    return hideHidedStreak;
   }
 }
