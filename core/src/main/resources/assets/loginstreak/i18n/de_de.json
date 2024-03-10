@@ -9,7 +9,10 @@
         "name": "Anzeigegröße ändern"
       },
       "hideZero": {
-        "name": "Null verstecken"
+        "name": "Verstecke 0 Streak"
+      },
+      "hideHidedStreak": {
+        "name": "Verstecke versteckte Streak"
       },
       "clearCache": {
         "name": "Leere Cache",

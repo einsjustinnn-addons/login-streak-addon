@@ -11,6 +11,9 @@
       "hideZero": {
         "name": "Hide zero"
       },
+      "hideHidedStreak": {
+        "name": "Hide hided streak"
+      },
       "clearCache": {
         "name": "Clear Cache",
         "notification": "Cache cleared",
