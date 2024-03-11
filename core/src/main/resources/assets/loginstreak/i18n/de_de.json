@@ -6,19 +6,17 @@
         "name": "Aktiviert"
       },
       "scale": {
-        "name": "Anzeigegröße ändern"
+        "name": "Anzeigegröße"
       },
-      "hideZero": {
-        "name": "Verstecke 0 Streak"
-      },
-      "hideHidedStreak": {
-        "name": "Verstecke versteckte Streak"
+      "hideHiddenStreak": {
+        "name": "Mache versteckte Streaks unsichtbar"
       },
       "clearCache": {
         "name": "Leere Cache",
         "notification": "Cache geleert",
         "text": "Lösche"
       }
-    }
+    },
+    "hidden": "Versteckt"
   }
 }

@@ -6,19 +6,17 @@
         "name": "Enabled"
       },
       "scale": {
-        "name": "Change display size"
+        "name": "Tag size"
       },
-      "hideZero": {
-        "name": "Hide zero"
-      },
-      "hideHidedStreak": {
-        "name": "Hide hided streak"
+      "hideHiddenStreak": {
+        "name": "Hide hidden streak"
       },
       "clearCache": {
         "name": "Clear Cache",
         "notification": "Cache cleared",
         "text": "Clear"
       }
-    }
+    },
+    "hidden": "Hidden"
   }
 }
