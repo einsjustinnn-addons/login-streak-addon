@@ -47,8 +47,6 @@ public class LoginStreakApi {
 
             if (jsonObject.get("playtime") != null) {
               streak = jsonObject.get("playtime").getAsJsonObject().get("streak").getAsInt();
-            } else {
-              streak = -2;
             }
 
           } finally {
