@@ -11,10 +11,6 @@ public class LoginStreakAddon extends LabyAddon<LoginStreakConfiguration> {
 
   private static LoginStreakAddon addon;
 
-  /* TODO
-  add Switcher for hided streaks
-   */
-
   @Override
   protected void enable() {
 
