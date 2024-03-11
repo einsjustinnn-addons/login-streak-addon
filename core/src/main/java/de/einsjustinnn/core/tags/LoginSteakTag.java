@@ -6,6 +6,7 @@ import de.einsjustinnn.core.utils.LoginStreakCache;
 import de.einsjustinnn.core.utils.StreakResolver;
 import net.labymod.api.Laby;
 import net.labymod.api.client.component.Component;
+import net.labymod.api.client.component.format.NamedTextColor;
 import net.labymod.api.client.entity.player.Player;
 import net.labymod.api.client.entity.player.tag.tags.NameTag;
 import net.labymod.api.client.gui.icon.Icon;
@@ -22,7 +23,6 @@ public class LoginSteakTag extends NameTag {
   private final LoginStreakApi loginStreakApi;
   private int streak;
   private long rateLimited;
-  private int tempRate;
 
   public LoginSteakTag() {
     loginStreakApi = new LoginStreakApi();
@@ -30,7 +30,13 @@ public class LoginSteakTag extends NameTag {
 
   @Override
   public boolean isVisible() {
-    return !this.entity.isCrouching() && LoginStreakAddon.getAddon().configuration().enabled().get();
+    if (LoginStreakAddon.getAddon().configuration().enabled().get() && !this.entity.isCrouching()) {
+      if (streak == 0 && LoginStreakAddon.getAddon().configuration().hideHiddenStreak().get()) {
+        return false;
+      }
+      return LoginStreakCache.loginStreaks.containsKey(entity.getUniqueId());
+    }
+    return false;
   }
 
   @Override
@@ -61,7 +67,6 @@ public class LoginSteakTag extends NameTag {
 
   @Override
   protected @Nullable RenderableComponent getRenderableComponent() {
-
     if (!LoginStreakAddon.getAddon().configuration().enabled().get()) return null;
     if (!(entity instanceof Player player)) return null;
     if (player.getNetworkPlayerInfo() == null) return null;
@@ -78,14 +83,6 @@ public class LoginSteakTag extends NameTag {
       streak = streak1;
     } else {
       if (System.currentTimeMillis() < rateLimited) {
-        int rateLimitSeconds = (int) ((rateLimited - System.currentTimeMillis()) / 1000);
-        if (tempRate == 0) {
-          tempRate = rateLimitSeconds;
-        }
-        if (tempRate >= rateLimitSeconds) {
-          LoginStreakAddon.getAddon().logger().info("currently in the rate limit for " + rateLimitSeconds + " seconds.");
-          tempRate--;
-        }
         return null;
       }
 
@@ -96,17 +93,14 @@ public class LoginSteakTag extends NameTag {
       return null;
     }
 
-    if (streak == 0 && LoginStreakAddon.getAddon().configuration().hideZero().get()) {
+    if (streak == 0 && LoginStreakAddon.getAddon().configuration().hideHiddenStreak().get()) {
       return null;
     }
 
-    if (streak == -2 && LoginStreakAddon.getAddon().configuration().hideHidedStreak().get()) {
-      return null;
-    }
+    Component component = streak == 0 ? Component.translatable("loginstreak.hidden", NamedTextColor.RED)
+        : Component.text(streak, streak > 365 ? NamedTextColor.GOLD : NamedTextColor.YELLOW);
 
-    String streakString = (streak == -2) ? "§7hide" : formatStreak(streak);
-
-    return RenderableComponent.of(Component.text(streakString));
+    return RenderableComponent.of(component);
   }
 
   private void requestStreak(Player player) {
@@ -133,9 +127,5 @@ public class LoginSteakTag extends NameTag {
         }
       }
     });
-  }
-
-  private String formatStreak(int streak) {
-    return (streak > 365) ? "§6§o" + streak : "§e§o" + streak;
   }
 }
