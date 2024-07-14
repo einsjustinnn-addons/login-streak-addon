@@ -33,8 +33,7 @@ public class LoginStreakConfiguration extends AddonConfig {
   @SpriteSlot(x = 2)
   private final ConfigProperty<Boolean> hideHiddenStreak = new ConfigProperty<>(true);
 
-
-  @MethodOrder(after = "enabled")
+  @MethodOrder(after = "hideHiddenStreak")
   @ButtonSetting
   @SuppressWarnings("unused")
   public void clearCache() {
