@@ -1,6 +1,7 @@
 package de.einsjustinnn.core;
 
 import de.einsjustinnn.core.config.LoginStreakConfiguration;
+import de.einsjustinnn.core.listeners.DisconnectListener;
 import de.einsjustinnn.core.tags.LoginSteakTag;
 import net.labymod.api.addon.LabyAddon;
 import net.labymod.api.client.entity.player.tag.PositionType;
@@ -18,9 +19,9 @@ public class LoginStreakAddon extends LabyAddon<LoginStreakConfiguration> {
 
     this.registerSettingCategory();
 
-    labyAPI().tagRegistry().register("login_streak", PositionType.BELOW_NAME, new LoginSteakTag());
+    registerListener(new DisconnectListener());
 
-    this.logger().info("Enabled the Addon");
+    labyAPI().tagRegistry().register("login_streak", PositionType.BELOW_NAME, new LoginSteakTag());
   }
 
   @Override
